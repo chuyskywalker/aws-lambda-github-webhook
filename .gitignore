@@ -2,3 +2,5 @@
 lambda.zip
 src/vendor/*
 variables.tf
+src/ghtoken.txt
+terraform.tfstate*
