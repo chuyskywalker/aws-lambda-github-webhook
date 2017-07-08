@@ -1,0 +1,4 @@
+.idea
+lambda.zip
+src/vendor/*
+variables.tf

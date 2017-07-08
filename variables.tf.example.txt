@@ -1,0 +1,13 @@
+# copy and rename to variables.tf and fill in as needed
+
+variable "region" {
+  default = "us-west-1"
+}
+
+variable "aws_access_key" {
+  default = "your access key here"
+}
+
+variable "aws_secret_key" {
+  default = "your secret key here"
+}
