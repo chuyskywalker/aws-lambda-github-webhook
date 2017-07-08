@@ -3,4 +3,5 @@ lambda.zip
 src/vendor/*
 variables.tf
 src/ghtoken.txt
+src/ghsecret.txt
 terraform.tfstate*

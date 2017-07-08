@@ -16,8 +16,14 @@ You should be able to deploy this without editing any application code to get a 
 1. AWS Access Key
 2. AWS Secret Key
 3. Github Token
+4. Github Webhook Secret
 
-Copy `variables.tf.example.txt` to `variables.tf` and fill in the AWS credentials. Then create `src/ghtoken.txt` and place the Github token in that file.
+Copy `variables.tf.example.txt` to `variables.tf` and fill in the AWS credentials. 
+
+Create `src/ghtoken.txt` and place the Github token in that file.
+
+Create `src/ghsecret.txt` and put a random, keyboard-smash ascii string in there. You'll use this when setting up the webhook later on.
+
 
 ### Build
 
@@ -26,11 +32,7 @@ This will fetch all the requirements and place them in vendor where `main.py` wi
 $ pip install -r src/vendor/requirements.txt -t src/vendor 
 ```
 
-If you'd like, you can also locally test the code by running
- 
-```bash
-$ python src/main.py 
-```
+~~If you'd like, you can also locally test the code by running `python src/main.py`.~~ _todo: fix with local event examples_
 
 ### Deploy
 
@@ -46,19 +48,32 @@ This will package your app (`src/`) into a zip file, upload it as your lamda fun
 prod_url = https://xxxxxxx.execute-api.xxxxxx.amazonaws.com/prod/hook    
 ```
 
-Copy this URL and add it as a `Content-type: application/json` webhook to your repository. Run the test ping event and go check your Lambda function logs to see that it went through!
+Keep that for the next step.
+
+### Install Github Webhook
+
+1. Go to the repo you want to try this on and into the "Settings" area. 
+2. Open "Webhooks"
+3. Click "Add Webhook"
+4. Set the "Payload URL" to the `prod_url` from above
+5. Change "Content-type" to "application/json"
+6. Put the secret from `src/ghsecret.txt` into the "Secret" field
+7. Switch the hook to "Let me select individual events" and only check the box for "Pull Requests"
+8. Finally, save by pressing "Add webhook"
+
+Now go open a Pull Request and you'll get a opening comment on the issue as well as a passing status check. 
+
+Success!
 
 ## Thanks
 
 I used these are references and starting points for this project
 
+Articles:
 - [Using Terraform to setup AWS API-Gateway and Lambda](https://andydote.co.uk/2017/03/17/terraform-aws-lambda-api-gateway/) -- Credit where due, most of the terraform states came from this fellow.
 - [Terraforming Amazon AWS Lambda function and related API Gateway](http://www.arvinep.com/2016/06/terraforming-amazon-aws-lambda-function.html) -- Helped with a missing cloudwatch log setup
 
-# TODO
-
-As I commit (weekend projects!) this doesn't actually _do_ anything in the webhook response. I want to add [secret validation](https://github.com/carlos-jenkins/python-github-webhooks/blob/870c39e2cd66405014ef66e1011ca5399413cd2a/webhooks.py#L70) first and then some instructions on setting up the webhook for pull requests to do some basic check type structure.
-
-I'd also like to explore [triggering secondary lambda functions](https://stackoverflow.com/questions/36784925/how-to-get-return-response-from-aws-lambda-function?rq=1) in order to spread the task work out and to allow for much faster hook replies (async calls to the secondaries).
-
-Good times!
+API Docs:
+- [boto3](http://boto3.readthedocs.io/)
+- [GithubAPI](https://developer.github.com/v3)
+- [PyGithub](http://pygithub.readthedocs.io/)

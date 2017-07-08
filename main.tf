@@ -25,18 +25,38 @@ data "archive_file" "lambda" {
   output_path = "lambda.zip"
 }
 
-resource "aws_lambda_function" "tf_gh_check_function" {
+resource "aws_lambda_function" "tf_gh_check_function_incoming" {
   filename = "${data.archive_file.lambda.output_path}"
   function_name = "tf_gh_check"
   role = "${aws_iam_role.tf_gh_check_role.arn}"
-  handler = "main.handler"
+  handler = "main.incoming"
+  runtime = "python2.7"
+  source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
+  publish = true
+}
+
+resource "aws_lambda_function" "tf_gh_check_function_opening_comment" {
+  filename = "${data.archive_file.lambda.output_path}"
+  function_name = "tf_gh_check_function_opening_comment"
+  role = "${aws_iam_role.tf_gh_check_role.arn}"
+  handler = "main.opening_comment"
+  runtime = "python2.7"
+  source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
+  publish = true
+}
+
+resource "aws_lambda_function" "tf_gh_check_function_passing_status" {
+  filename = "${data.archive_file.lambda.output_path}"
+  function_name = "tf_gh_check_function_passing_status"
+  role = "${aws_iam_role.tf_gh_check_role.arn}"
+  handler = "main.passing_status"
   runtime = "python2.7"
   source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
   publish = true
 }
 
 resource "aws_lambda_permission" "allow_api_gateway" {
-  function_name = "${aws_lambda_function.tf_gh_check_function.arn}"
+  function_name = "${aws_lambda_function.tf_gh_check_function_incoming.arn}"
   statement_id = "AllowExecutionFromApiGateway"
   action = "lambda:InvokeFunction"
   principal = "apigateway.amazonaws.com"
@@ -66,12 +86,12 @@ resource "aws_api_gateway_integration" "tf_gh_check_integration" {
   resource_id = "${aws_api_gateway_resource.tf_gh_check_gateway_resource.id}"
   http_method = "${aws_api_gateway_method.tf_gh_check_gateway_method.http_method}"
   type = "AWS_PROXY"
-  uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${aws_lambda_function.tf_gh_check_function.function_name}/invocations"
+  uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${aws_lambda_function.tf_gh_check_function_incoming.function_name}/invocations"
   integration_http_method = "POST"
 }
 
 resource "aws_cloudwatch_log_group" "tf_gh_check_logs" {
-  name = "/aws/lambda/${aws_lambda_function.tf_gh_check_function.function_name}"
+  name = "/aws/lambda/${aws_lambda_function.tf_gh_check_function_incoming.function_name}"
 }
 
 resource "aws_api_gateway_deployment" "tf_gh_check_prod" {
