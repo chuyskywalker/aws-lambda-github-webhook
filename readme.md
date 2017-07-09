@@ -1,6 +1,6 @@
 # Github Webhook via AWS Lamba Python
 
-An exploration of leveraging AWS Lamba to produce "serverless" python handling for github webhooks. In addition, the segments of code run can are driven by a config in the repo issuing the webhook call (think `.travis.yml` like system, but with support for _any_ kind of webhook, not just pull requests).
+An exploration of leveraging AWS Lamba to produce "serverless" python handling for github webhooks. In addition, the originating repo controls which checks are run through its own `.hooks.yml` file (think `.travis.yml` like system, but with support for _any_ kind of webhook, not just pull requests).
 
 ## Deployment
 
