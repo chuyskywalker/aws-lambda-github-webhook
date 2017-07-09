@@ -5,7 +5,7 @@ hooks:
   # an entry from paths must be loadable, valid YAML
   yml_validation:
     paths:
-      - *.yml
+      - "*.yml"
 
   # Requires `amount` number of approvals before
   # pr status check pass
