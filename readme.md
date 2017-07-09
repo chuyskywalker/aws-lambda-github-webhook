@@ -1,6 +1,6 @@
 # Github Webhook via AWS Lamba Python
 
-An exploration of leveraging AWS Lamba to produce "serverless" python handling for github webhooks.
+An exploration of leveraging AWS Lamba to produce "serverless" python handling for github webhooks. In addition, the segments of code run can are driven by a config in the repo issuing the webhook call (think `.travis.yml` like system, but with support for _any_ kind of webhook, not just pull requests).
 
 ## Deployment
 
@@ -61,9 +61,7 @@ Keep that for the next step.
 7. Switch the hook to "Let me select individual events" and only check the box for "Pull Requests"
 8. Finally, save by pressing "Add webhook"
 
-Now go open a Pull Request and you'll get a opening comment on the issue as well as a passing status check. 
-
-Success!
+Once the webhook is in place, you'll need one more thing. This demo will trigger checks based on a file called `.hooks.yml` in your repositories default branch. None of these hooks are currently doing anything other than issuing a rubber stamp status check on pull requests. You can see an example [`.hooks.yml` in this repo](./.hooks.yml).
 
 ## Thanks
 

@@ -1,0 +1,36 @@
+type: map
+mapping:
+
+  version:
+    type: int
+    required: True
+    range:
+      min: 1
+      max: 1
+
+  hooks:
+    type: map
+    required: True
+    mapping:
+
+      yml_validation:
+        type: map
+        mapping:
+          paths:
+            required: True
+            type: seq
+            sequence:
+              - type: str
+
+      approval_count:
+        type: map
+        mapping:
+          amount:
+            required: True
+            type: int
+            range:
+              min: 1
+
+      always_pass:
+        type: map
+        allowempty: True

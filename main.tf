@@ -31,28 +31,20 @@ resource "aws_lambda_function" "tf_gh_check_function_incoming" {
   role = "${aws_iam_role.tf_gh_check_role.arn}"
   handler = "main.incoming"
   runtime = "python2.7"
-  source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
+  source_code_hash = "${data.archive_file.lambda.output_base64sha256}"
   publish = true
+  timeout = 5
 }
 
-resource "aws_lambda_function" "tf_gh_check_function_opening_comment" {
+resource "aws_lambda_function" "tf_gh_check_function_secondary" {
   filename = "${data.archive_file.lambda.output_path}"
-  function_name = "tf_gh_check_function_opening_comment"
+  function_name = "tf_gh_check_function_secondary"
   role = "${aws_iam_role.tf_gh_check_role.arn}"
-  handler = "main.opening_comment"
+  handler = "main.secondary"
   runtime = "python2.7"
-  source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
+  source_code_hash = "${data.archive_file.lambda.output_base64sha256}"
   publish = true
-}
-
-resource "aws_lambda_function" "tf_gh_check_function_passing_status" {
-  filename = "${data.archive_file.lambda.output_path}"
-  function_name = "tf_gh_check_function_passing_status"
-  role = "${aws_iam_role.tf_gh_check_role.arn}"
-  handler = "main.passing_status"
-  runtime = "python2.7"
-  source_code_hash = "${base64sha256(file("${data.archive_file.lambda.output_path}"))}"
-  publish = true
+  timeout = 30
 }
 
 resource "aws_lambda_permission" "allow_api_gateway" {

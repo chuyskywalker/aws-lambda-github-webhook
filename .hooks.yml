@@ -1,0 +1,17 @@
+version: 1
+hooks:
+
+  # Requires that, on a PR, all files changed and matching
+  # an entry from paths must be loadable, valid YAML
+  yml_validation:
+    paths:
+      - *.yml
+
+  # Requires `amount` number of approvals before
+  # pr status check pass
+  approval_count:
+    amount: 2
+
+  # Silly check that always passes
+  always_pass:
+    nice: "yup"
