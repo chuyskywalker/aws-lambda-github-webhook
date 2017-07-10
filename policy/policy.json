@@ -6,20 +6,9 @@
       "Action": [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "lambda:InvokeFunction"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
+        "logs:PutLogEvents",
+        "logs:FilterLogEvents",
+        "lambda:InvokeFunction",
         "cloudwatch:Describe*",
         "cloudwatch:Get*",
         "cloudwatch:List*"
