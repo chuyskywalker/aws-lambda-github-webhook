@@ -2,3 +2,4 @@ PyGithub==1.34
 boto3==1.4.4
 PyYAML==3.12
 pykwalify==1.6.0
+pyDES==2.0.1
