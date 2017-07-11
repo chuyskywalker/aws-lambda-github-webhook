@@ -4,7 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "vendor"))
 import json, boto3, datetime, logging
 from util.stoken import decode_log_location
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def logview(event, context):

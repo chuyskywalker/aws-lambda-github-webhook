@@ -2,7 +2,7 @@ import json, logging, urllib
 from util.stoken import encode_log_location
 from util.tfgithub import get_github
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def fake_done(name, event, context):

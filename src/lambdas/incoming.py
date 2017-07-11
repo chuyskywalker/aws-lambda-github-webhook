@@ -4,8 +4,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "vendor"))
 import boto3, json, logging, hmac, hashlib, yaml, github
 from pykwalify.core import Core
 from util.tfgithub import get_github
+from checks import all as all_checks
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def incoming(event, context):
@@ -20,8 +21,11 @@ def incoming(event, context):
         return {"body": json.dumps({"error": "invalid signature"}), "statusCode": 403}
 
     # Get the hook info
-    # todo: we trust github to send valid json, but should add a try/catch anyway
-    hookdata = json.loads(event['body'])
+    try:
+        hookdata = json.loads(event['body'])
+    except Exception:
+        logger.error("Failed to decode json")
+        return {"body": json.dumps({"error": "json decode failure"}), "statusCode": 500}
 
     # this will only work, for now, with hooks that include repo information
     if 'repository' not in hookdata:
@@ -38,8 +42,11 @@ def incoming(event, context):
         logger.error("Missig .hooks.yml on repo {}".format(repo))
         return {"body": json.dumps({"error": "no .hooks.yml present"}), "statusCode": 501}
 
-    # todo: safe load try/catch needed here
-    hook_config = yaml.safe_load(hooks_yml.decoded_content)
+    try:
+        hook_config = yaml.safe_load(hooks_yml.decoded_content)
+    except Exception:
+        logger.error("Failed to decode hook yaml")
+        return {"body": json.dumps({"error": "hook yaml failure"}), "statusCode": 500}
 
     # Schema based validation
     c = Core(source_data=hook_config, schema_files=[os.path.join(os.path.dirname(__file__), "..", "hooks.schema.yml")])
@@ -51,36 +58,14 @@ def incoming(event, context):
     ghevent = event['headers'].get('X-GitHub-Event', '')
 
     # Check hooks!
-
-    # we _always_ run the .hooks.yml schema validation check
-    if (ghevent == 'pull_request' and
-        'action' in hookdata and hookdata["action"] in ["opened", "synchronize", "reopened"]):
-        invoke_secondary('hooks_schema', {}, event)
-
-    # yml validation is only on pull requests (re)open|sync
-    if ('yml_validation' in hook_config['hooks'] and
-        ghevent == 'pull_request' and
-        'action' in hookdata and hookdata["action"] in ["opened", "synchronize", "reopened"]
-       ):
-        invoke_secondary('yml_validation', hook_config['hooks']['yml_validation'], event)
-
-    # A silly one that always passes on pull requests (re)open|sync
-    if ('always_pass' in hook_config['hooks'] and
-        ghevent == 'pull_request' and
-        'action' in hookdata and hookdata["action"] in ["opened", "synchronize", "reopened"]
-       ):
-        invoke_secondary('always_pass', hook_config['hooks']['always_pass'], event)
-
-    # approval count triggers on pr (re)open as well as pr_review events
-    if ('approval_count' in hook_config['hooks'] and (
-         (ghevent == 'pull_request' and
-          'action' in hookdata and hookdata["action"] in ["opened", "synchronize", "reopened"])
-         or
-         (ghevent == 'pull_request_review' and
-          'action' in hookdata and hookdata["action"] in ["submitted", "edited"])
-        )
-       ):
-        invoke_secondary('approval_count', hook_config['hooks']['approval_count'], event)
+    logger.info("Qualifying checks:")
+    for name, check in all_checks.get_all_checks().iteritems():
+        check_config = check.qualify(ghevent, hookdata, hook_config)
+        if check_config:
+            logger.info("- {} passed qualify, invoking secondary call".format(name))
+            invoke_secondary(name, check_config, event)
+        else:
+            logger.info("- {} did not qualify, skipping".format(name))
 
     # all done!
     return {"body": json.dumps({"message": "Thanks"}), "statusCode": 200}

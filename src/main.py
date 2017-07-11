@@ -1,6 +1,15 @@
 import logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+
+# locally works, but I think lambda overrides this by running one sooner
+logging.basicConfig()
+
+# Set the root to ERROR level
+logging.getLogger().setLevel(logging.ERROR)
+
+# INFO our loggers
+logging.getLogger('checks').setLevel(logging.INFO)
+logging.getLogger('lambdas').setLevel(logging.INFO)
+logging.getLogger('util').setLevel(logging.INFO)
 
 # lambda hook for logview:
 from lambdas.logview import logview
@@ -11,9 +20,10 @@ from lambdas.incoming import incoming
 # lambda hook for secondary:
 from lambdas.secondary import secondary
 
-# def main():
-#     pass # stuff
-#
-# # For local testing
-# if __name__ == "__main__":
-#     main()
+
+def main():
+    pass # stuff
+
+# For local testing
+if __name__ == "__main__":
+    main()

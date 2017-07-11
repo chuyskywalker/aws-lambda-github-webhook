@@ -1,9 +1,17 @@
-from fake_done import fake_done
+from util.fake_done import fake_done
+import check
 
 
-def always_pass(event, context):
-    """
-    Scan all specified paths and confirm that the yml files are loadably safe
-    """
-    # todo: actually imlement
-    fake_done('always_pass', event, context)
+class AlwaysPass(check.Check):
+
+    configname = 'always_pass'
+
+    def qualify(self, github_event, event_data, hooks_config):
+
+        if self.configname not in hooks_config['hooks']:
+            return False
+
+        return hooks_config['hooks'][self.configname]
+
+    def run(self, event, context):
+        fake_done(self.configname, event, context)
