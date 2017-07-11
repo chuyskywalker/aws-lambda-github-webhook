@@ -61,7 +61,7 @@ def incoming(event, context):
     logger.info("Qualifying checks:")
     for name, check in all_checks.get_all_checks().iteritems():
         check_config = check.qualify(ghevent, hookdata, hook_config)
-        if check_config:
+        if check_config != False: # use boolean in case of "empty" configs
             logger.info("- {} passed qualify, invoking secondary call".format(name))
             invoke_secondary(name, check_config, event)
         else:
