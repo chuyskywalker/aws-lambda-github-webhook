@@ -25,9 +25,6 @@ class HooksScehma(check.Check):
     def run(self, event, context):
 
         gh_hook = json.loads(event['body'])
-
-        logger.info("Fetching .hook.yml from branch")
-
         repo = gh_hook['repository']['full_name']
         sha = gh_hook['pull_request']['head']['sha']
 
@@ -51,9 +48,11 @@ class HooksScehma(check.Check):
         c = Core(source_data=hook_config,
                  schema_files=[os.path.join(os.path.dirname(__file__), "..", "hooks.schema.yml")])
         c.validate(raise_exception=False)
-        if len(c.validation_errors) > 0:
-            logger.error(c.validation_errors)
-            send_status(event, context, gh_hook, self.configname, 'failure', ".hooks.yml has validation errors; see log")
+        vc = len(c.validation_errors)
+        if vc > 0:
+            for err in c.validation_errors:
+                logger.error(" - {}".format(err))
+            send_status(event, context, gh_hook, self.configname, 'failure', ".hooks.yml has {} validation errors; see log".format(vc))
             return
 
         send_status(event, context, gh_hook, self.configname, 'success', ".hooks.yml present and valid")
