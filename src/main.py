@@ -11,6 +11,9 @@ logging.getLogger('checks').setLevel(logging.INFO)
 logging.getLogger('lambdas').setLevel(logging.INFO)
 logging.getLogger('util').setLevel(logging.INFO)
 
+# FINE
+logging.getLogger('pykwalify').setLevel(logging.CRITICAL)
+
 # lambda hook for logview:
 from lambdas.logview import logview
 
